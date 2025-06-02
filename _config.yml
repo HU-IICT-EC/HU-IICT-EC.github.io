@@ -1,0 +1,16 @@
+title: HU-IICT-EC GitHub Pages
+description: HU-IICT-EC GitHub Pages
+url: "https://hu-iict-ec.github.io"
+baseurl: "" # leave empty for user/organization site
+
+theme: minima
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle

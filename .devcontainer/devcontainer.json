@@ -1,0 +1,17 @@
+{
+  "name": "Jekyll & GitHub Pages",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "forwardPorts": [
+    4000
+  ],
+  "postCreateCommand": "bundle install",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+      }
+    }
+  }
+}
