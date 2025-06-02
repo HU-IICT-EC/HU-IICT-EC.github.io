@@ -1,0 +1,48 @@
+<h3>Examinator Excel Download</h3>
+<ol>
+  <li>
+    <label>Log in op Osiris en download het HTML rapport 9.1.06</label><br />
+    <button class="btn btn-primary mt-2"
+      onclick='window.open("https://osiris.hu.nl/osiris_rapport/rapporten/faces/UIReportShell", "_blank")'>
+      Open Osiris
+    </button>
+    <ol type="a">
+      <li>
+        <label>Selecteer: Docent-&gt;Rol: EXAMINATOR</label>
+      </li>
+      <li>
+        <label>Selecteer: Bestandsformaat: HTML</label>
+      </li>
+      <li>
+        <label>Pas optionele selectie toe:</label>
+        <ul>
+          <li>Collegejaar: Huidige periode</li>
+          <li>Beperk cursussen tot: Alleen eigen cursussen</li>
+          <li>etc</li>
+      </li>
+    </ol>
+
+  </li>
+  <li>
+    <label for="examinatorFile">Upload het gedownloade HTML-bestand:</label><br />
+    <input type="file" id="examinatorFile" class="form-control mt-2" accept=".html,.htm" />
+  </li>
+  <li>
+    <label>Na uploaden wordt het bestand automatisch verwerkt en kun je het resultaat downloaden.</label><br />
+    <span id="processing-indicator-examinator" style="display:none;">
+      <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
+      Bezig met verwerken...
+    </span>
+    <button id="download-examinator" class="btn btn-primary mt-2 disabled" tabindex="-1"
+      aria-disabled="true">Download</button>
+  </li>
+</ol>
+<py-script src="/assets/tools/examinator_excel_download.py" type="py"></py-script>
+<script>
+  document.getElementById("examinatorFile").addEventListener("change", function () {
+    document.getElementById("processing-indicator-examinator").style.display = "inline-block";
+    setTimeout(function () {
+      document.getElementById("examinatorFile").dispatchEvent(new Event("process-excel"));
+    }, 50);
+  });
+</script>

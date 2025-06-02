@@ -1,0 +1,7 @@
+{
+    "packages": [
+        "pandas",
+        "beautifulsoup4",
+        "openpyxl"
+    ]
+}

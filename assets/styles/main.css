@@ -1,0 +1,134 @@
+/* HU primary colors */
+:root {
+    --hu-red: #e6302b;
+    --hu-blue: #00a1e1;
+    --hu-dark: #222;
+    --hu-light: #fff;
+    --hu-gray: #f5f5f5;
+}
+
+/* Body and backgrounds */
+s body {
+    background-color: var(--hu-gray);
+    color: var(--hu-dark);
+    font-family: 'Open Sans', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header */
+header {
+    background-color: var(--hu-light) !important;
+    border-bottom: 4px solid var(--hu-red);
+    padding-bottom: 1.5rem !important;
+}
+
+header h1 {
+    color: var(--hu-red) !important;
+    font-weight: 700;
+    font-size: 2.2rem;
+    margin-top: 1rem;
+    margin-bottom: 0;
+    letter-spacing: 0.01em;
+}
+
+.topbar-logo__picture {
+    margin-bottom: 10px;
+}
+
+/* Nav Tabs */
+.nav-tabs {
+    border-bottom: 2px solid var(--hu-blue);
+}
+
+.nav-tabs .nav-link {
+    color: var(--hu-blue);
+    font-weight: 600;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: none;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-link:focus,
+.nav-tabs .nav-link:hover {
+    color: var(--hu-red);
+    border-bottom: 3px solid var(--hu-red);
+    background: none;
+}
+
+/* Main container */
+main.container {
+    background: var(--hu-light);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(34, 34, 34, 0.05);
+    padding: 2rem 2rem 1rem 2rem;
+    margin-top: 2rem;
+}
+
+/* Footer */
+footer {
+    background: var(--hu-blue) !important;
+    color: var(--hu-light) !important;
+    font-size: 1rem;
+    border-top: 4px solid var(--hu-red);
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--hu-blue);
+    border-color: var(--hu-blue);
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background-color: var(--hu-red);
+    border-color: var(--hu-blue);
+}
+
+/* Forms */
+input[type="file"].form-control {
+    border: 1px solid #ccc;
+    padding: 0.5rem;
+    background: var(--hu-gray);
+    border-radius: 4px;
+}
+
+/* Spinner */
+.spinner-border.text-primary {
+    color: var(--hu-blue) !important;
+}
+
+/* HU header and footer styling */
+.hu-header {
+    background-color: var(--hu-light);
+    border-bottom: 4px solid var(--hu-red);
+}
+
+.hu-header-title {
+    color: var(--hu-red);
+    font-weight: 700;
+    font-size: 2.2rem;
+    margin-top: 1rem;
+    margin-bottom: 0;
+    letter-spacing: 0.01em;
+}
+
+.hu-footer {
+    background: var(--hu-blue);
+    color: var(--hu-light);
+    font-size: 1rem;
+    border-top: 4px solid var(--hu-red);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    main.container {
+        padding: 1rem 0.5rem;
+    }
+
+    header h1 {
+        font-size: 1.3rem;
+    }
+}

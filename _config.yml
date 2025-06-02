@@ -1,7 +1,7 @@
-title: HU-IICT-EC GitHub Pages
-description: HU-IICT-EC GitHub Pages
+title: Tools Examencommissie IICT - HU
+description: Tools Examencommissie IICT - HU
 url: "https://hu-iict-ec.github.io"
-baseurl: "" # leave empty for user/organization site
+baseurl: "" 
 
 theme: minima
 
@@ -14,3 +14,8 @@ exclude:
   - Gemfile.lock
   - node_modules
   - vendor/bundle
+
+tools:
+  - Examinator_Excel_Download.html
+  - Steekproef.html
+  # Add more tool include filenames here

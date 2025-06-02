@@ -1,0 +1,25 @@
+<h3>Steekproef</h3>
+<ol>
+    <li>
+        <label for="steekproefFile">Upload het voorbereidde excelbestand:</label><br />
+        <input type="file" id="steekproefFile" class="form-control mt-2" accept=".xlsx,.xls" />
+    </li>
+    <li>
+        <label>Na uploaden wordt het bestand automatisch verwerkt en kun je het resultaat downloaden.</label><br />
+        <span id="processing-indicator-steekproef" style="display:none;">
+            <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
+            Bezig met verwerken...
+        </span>
+        <button id="download-steekproef" class="btn btn-primary mt-2 disabled" tabindex="-1"
+            aria-disabled="true">Download</button>
+    </li>
+</ol>
+<py-script src="/assets/tools/steekproef.py" type="py"></py-script>
+<script>
+    document.getElementById("steekproefFile").addEventListener("change", function () {
+        document.getElementById("processing-indicator-steekproef").style.display = "inline-block";
+        setTimeout(function () {
+            document.getElementById("steekproefFile").dispatchEvent(new Event("process-excel"));
+        }, 50);
+    });
+</script>
