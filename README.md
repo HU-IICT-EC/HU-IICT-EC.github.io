@@ -1,41 +1,43 @@
 # HU-IICT-EC GitHub Pages
 
-This repository is intended for hosting the HU-IICT-EC GitHub Pages site.
+Deze repository is bedoeld voor het hosten van de HU-IICT-EC GitHub Pages site.
 
-## Project Structure
+## Projectstructuur
 
 ```
 HU-IICT-EC.github.io
 ├── src
-│   ├── index.html        # Main HTML document for the site
+│   ├── index.html        # Hoofddocument van de site
 │   ├── styles
-│   │   └── main.css      # CSS styles for the web application
+│   │   └── main.css      # CSS-stijlen voor de webapplicatie
 │   └── scripts
-│       └── main.js       # JavaScript code for interactivity
-├── .gitignore            # Files and directories to be ignored by Git
-└── README.md             # Documentation for the project
+│       └── main.js       # JavaScript-code voor interactiviteit
+├── .gitignore            # Bestanden en mappen die door Git genegeerd worden
+└── README.md             # Documentatie voor het project
 ```
 
-## Setup Instructions
+## Installatie-instructies
 
-1. Clone the repository to your local machine:
+1. Clone de repository naar je lokale machine:
    ```
    git clone https://github.com/HU-IICT-EC/HU-IICT-EC.github.io.git
    ```
 
-2. Navigate to the project directory:
+2. Navigeer naar de projectmap:
    ```
    cd HU-IICT-EC.github.io
    ```
 
-3. Open the `src/index.html` file in your web browser to view the site.
+3. Open het bestand `src/index.html` in je webbrowser om de site te bekijken.
 
-## Usage
+## Gebruik
 
-- Modify the `src/styles/main.css` file to change the appearance of the site.
-- Update the `src/scripts/main.js` file to add or modify interactivity.
-- Make sure to commit your changes and push them to the repository.
+- Pas het bestand `src/styles/main.css` aan om het uiterlijk van de site te wijzigen.
+- Werk het bestand `src/scripts/main.js` bij om interactiviteit toe te voegen of aan te passen.
+- Vergeet niet je wijzigingen te committen en naar de repository te pushen.
 
-## Contributing
+## Bijdragen
 
-Contributions are welcome! Please submit a pull request for any changes you would like to propose.
+Dit is een intern project van de HU-IICT-EC organisatie. Bijdragen zijn in principe beperkt tot leden van de HU-IICT-EC organisatie. Als je deel uitmaakt van de organisatie en wilt bijdragen, volg dan de standaard workflow voor interne projecten.
+
+Externe bijdragen worden niet geaccepteerd, tenzij expliciet gevraagd.
