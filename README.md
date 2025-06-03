@@ -1,43 +1,107 @@
 # HU-IICT-EC GitHub Pages
 
-Deze repository is bedoeld voor het hosten van de HU-IICT-EC GitHub Pages site.
+Deze repository host de HU-IICT-EC GitHub Pages site met tools voor de Examencommissie IICT van Hogeschool Utrecht.
 
 ## Projectstructuur
 
 ```
-HU-IICT-EC.github.io
-├── src
-│   ├── index.html        # Hoofddocument van de site
-│   ├── styles
-│   │   └── main.css      # CSS-stijlen voor de webapplicatie
-│   └── scripts
-│       └── main.js       # JavaScript-code voor interactiviteit
-├── .gitignore            # Bestanden en mappen die door Git genegeerd worden
-└── README.md             # Documentatie voor het project
+HU-IICT-EC.github.io/
+├── _includes/tools/           # Jekyll includes voor individuele tools
+│   ├── Examinator_Excel_Download.html
+│   └── Steekproef.html
+├── assets/
+│   ├── styles/
+│   │   └── main.css          # CSS-stijlen voor de webapplicatie
+│   └── tools/
+│       ├── pyscript.json     # PyScript configuratie
+│       ├── steekproef.py     # Python-code voor steekproef tool
+│       └── examinator_excel_download.py
+├── .devcontainer/            # Development container configuratie
+├── .github/
+│   └── instructions/         # Coding standards en instructies
+├── _config.yml               # Jekyll configuratie
+├── index.html                # Hoofddocument van de site
+├── Gemfile                   # Ruby dependencies
+├── .gitignore               # Git ignore regels
+└── README.md                # Deze documentatie
 ```
+
+## Technische Stack
+
+- **Jekyll**: Static site generator voor GitHub Pages
+- **Bootstrap 5**: CSS framework voor responsive design
+- **PyScript**: Client-side Python uitvoering in de browser
+- **Python Libraries**: pandas, openpyxl, beautifulsoup4 voor data processing
 
 ## Installatie-instructies
 
-1. Clone de repository naar je lokale machine:
-   ```
-   git clone https://github.com/HU-IICT-EC/HU-IICT-EC.github.io.git
-   ```
+### Lokale Ontwikkeling
 
-2. Navigeer naar de projectmap:
-   ```
+1. Clone de repository:
+   ```bash
+   git clone https://github.com/HU-IICT-EC/HU-IICT-EC.github.io.git
    cd HU-IICT-EC.github.io
    ```
 
-3. Open het bestand `src/index.html` in je webbrowser om de site te bekijken.
+2. Install dependencies:
+   ```bash
+   bundle install
+   ```
 
-## Gebruik
+3. Start de Jekyll development server:
+   ```bash
+   bundle exec jekyll serve
+   ```
 
-- Pas het bestand `src/styles/main.css` aan om het uiterlijk van de site te wijzigen.
-- Werk het bestand `src/scripts/main.js` bij om interactiviteit toe te voegen of aan te passen.
-- Vergeet niet je wijzigingen te committen en naar de repository te pushen.
+4. Open http://localhost:4000 in je browser.
+
+### Development Container
+
+Voor een consistente ontwikkelomgeving kun je de dev container gebruiken:
+
+1. Open het project in VS Code
+2. Klik op "Reopen in Container" wanneer gevraagd
+3. De container wordt automatisch gebouwd met alle benodigde dependencies
+
+## Beschikbare Tools
+
+### Steekproef
+- Voegt willekeurige nummers toe aan Excel-sheets voor steekproeftrekking
+- Ondersteunt multiple sheets met behoud van een Setup sheet
+
+### Examinator Excel Download
+- Converteert Osiris HTML rapporten naar gestructureerde Excel bestanden
+- Extraheert examinator-cursus relaties voor verdere analyse
+
+## Nieuwe Tool Toevoegen
+
+1. Maak een nieuwe HTML file in `_includes/tools/`
+2. Voeg eventuele Python-code toe in `assets/tools/`
+3. Update `_config.yml` om de nieuwe tool toe te voegen aan de `tools` lijst
+4. Test lokaal voordat je commit
 
 ## Bijdragen
 
-Dit is een intern project van de HU-IICT-EC organisatie. Bijdragen zijn in principe beperkt tot leden van de HU-IICT-EC organisatie. Als je deel uitmaakt van de organisatie en wilt bijdragen, volg dan de standaard workflow voor interne projecten.
+Dit is een intern project van de HU-IICT-EC organisatie. 
 
-Externe bijdragen worden niet geaccepteerd, tenzij expliciet gevraagd.
+### Voor Organisatieleden
+
+1. Fork de repository
+2. Maak een feature branch
+3. Volg de coding standards in `.github/instructions/`
+4. Test je wijzigingen lokaal
+5. Maak een pull request
+
+### Coding Standards
+
+- Volg de richtlijnen in `.github/instructions/general-coding.instructions.md`
+- Use semantic HTML elements
+- Write clear, self-documenting code
+- Add comments voor complexe logica
+- Test alle functionaliteit voordat je commit
+
+## Deployment
+
+De site wordt automatisch gedeployed naar GitHub Pages bij elke push naar de main branch.
+
+Live URL: https://hu-iict-ec.github.io
