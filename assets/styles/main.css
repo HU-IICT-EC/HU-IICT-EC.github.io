@@ -62,25 +62,58 @@ header h1 {
     margin-bottom: 10px;
 }
 
-.nav-tabs {
-    border-bottom: 2px solid var(--HU-BLUE);
+/* Responsive adjustments for side tabs */
+@media (max-width: 767.98px) {
+    .side-tabs {
+        border-right: none;
+        border-bottom: 2px solid var(--HU-BLUE);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+
+    .side-tabs .nav-link {
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        white-space: nowrap;
+        margin-right: 0.5rem;
+    }
+
+    .side-tabs .nav-link.active,
+    .side-tabs .nav-link:focus,
+    .side-tabs .nav-link:hover {
+        border-left: none;
+        border-bottom: 3px solid var(--HU-RED);
+    }
 }
 
-.nav-tabs .nav-link {
+/* Side navigation tabs */
+.side-tabs {
+    border-right: 2px solid var(--HU-BLUE);
+    height: 100%;
+}
+
+.side-tabs .nav-link {
     color: var(--HU-BLUE);
     font-weight: 600;
     border: none;
-    border-bottom: 3px solid transparent;
+    border-left: 3px solid transparent;
+    border-radius: 0;
     background: none;
-    transition: border-color 0.2s, color 0.2s;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    transition: border-color 0.2s, color 0.2s, background-color 0.2s;
+    text-align: left;
 }
 
-.nav-tabs .nav-link.active,
-.nav-tabs .nav-link:focus,
-.nav-tabs .nav-link:hover {
+.side-tabs .nav-link.active,
+.side-tabs .nav-link:focus,
+.side-tabs .nav-link:hover {
     color: var(--HU-RED);
-    border-bottom: 3px solid var(--HU-RED);
-    background: none;
+    border-left: 3px solid var(--HU-RED);
+    background-color: rgba(230, 48, 43, 0.05);
 }
 
 .btn-primary {

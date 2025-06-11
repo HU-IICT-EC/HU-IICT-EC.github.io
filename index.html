@@ -25,32 +25,36 @@ layout: none
         <img class="topbar-logo__picture" src="https://www.hu.nl/static/images/hu-logo.svg"
             alt="Logo Hogeschool Utrecht" width="180" height="44">
         <h1 class="hu-header-title">Tools Examencommissie IICT - HU</h1>
-    </header>
-
-    <!-- Main content -->
+    </header> <!-- Main content -->
     <main class="container mt-4">
-        <ul class="nav nav-tabs" id="tool-tabs" role="tablist">
-            {% for tool in site.tools %}
-            {% assign tool_name = tool | split: '.' | first %}
-            <li class="nav-item" role="presentation">
-                <button class="nav-link {% if forloop.first %}active{% endif %}" id="tab-{{ tool_name }}-tab"
-                    data-bs-toggle="tab" data-bs-target="#tab-{{ tool_name }}" type="button" role="tab"
-                    aria-controls="tab-{{ tool_name }}"
-                    aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
-                    {{ tool_name | replace: "_", " " }}
-                </button>
-            </li>
-            {% endfor %}
-        </ul>
-
-        <div class="tab-content mt-4" id="tool-tabs-content">
-            {% for tool in site.tools %}
-            {% assign tool_name = tool | split: '.' | first %}
-            <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="tab-{{ tool_name }}"
-                role="tabpanel" aria-labelledby="tab-{{ tool_name }}-tab">
-                {% include tools/{{ tool }} %}
+        <div class="row">
+            <!-- Side Navigation -->
+            <div class="col-md-3 mb-4">
+                <div class="nav flex-column nav-pills side-tabs" id="tool-tabs" role="tablist"
+                    aria-orientation="vertical">
+                    {% for tool in site.tools %}
+                    {% assign tool_name = tool | split: '.' | first %}
+                    <button class="nav-link {% if forloop.first %}active{% endif %}" id="tab-{{ tool_name }}-tab"
+                        data-bs-toggle="tab" data-bs-target="#tab-{{ tool_name }}" type="button" role="tab"
+                        aria-controls="tab-{{ tool_name }}"
+                        aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+                        {{ tool_name | replace: "_", " " }}
+                    </button>
+                    {% endfor %}
+                </div>
             </div>
-            {% endfor %}
+
+            <!-- Tab Content -->
+            <div class="col-md-9">
+                <div class="tab-content" id="tool-tabs-content">
+                    {% for tool in site.tools %}
+                    {% assign tool_name = tool | split: '.' | first %}
+                    <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="tab-{{ tool_name }}"
+                        role="tabpanel" aria-labelledby="tab-{{ tool_name }}-tab">
+                        {% include tools/{{ tool }} %} </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </main>
 
