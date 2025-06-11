@@ -20,3 +20,6 @@ Thumbs.db
 
 # Ignore VS Code settings
 .vscode/
+
+# Ignore Chrome extension files
+assets/osiris-chrome-extension/
