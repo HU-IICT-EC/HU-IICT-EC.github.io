@@ -235,7 +235,7 @@ document.getElementById('examinatorFile').addEventListener('change', function ()
     indicator.style.display = 'inline-block';
 
     setTimeout(function () {
-        document.dispatchEvent(new Event('process-excel'));
+        document.getElementById('examinatorFile').dispatchEvent(new Event('process-excel'));
     }, 50);
 });
 

@@ -180,7 +180,7 @@ def process_file(event):
 
 
 # Event listeners
-document.addEventListener(
+document.getElementById(FILE_INPUT_ID).addEventListener(
     'process-excel', create_proxy(process_file)
 )
 document.getElementById(DOWNLOAD_BUTTON_ID).addEventListener(
