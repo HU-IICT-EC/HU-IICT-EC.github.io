@@ -48,6 +48,8 @@ def _extract_examiner_data(html_content):
     osiris = BeautifulSoup(html_content, 'html.parser')
     examiners_rows = []
 
+    print(f'[examinator_excel_download] Extracting examiner data...')
+
     for p in osiris.select('p.c51'):
         try:
             medewerker = p.text.split()[-1][1:-1]
@@ -73,6 +75,8 @@ def _create_excel_with_table(dataframe):
     dataframe.to_excel(excel_buffer, index=False, sheet_name='Sheet1')
     excel_buffer.seek(0)
 
+    print(f'[examinator_excel_download] Creating Excel file with table formatting...')
+    
     # Load workbook and add table formatting
     wb = load_workbook(excel_buffer)
     ws = wb['Sheet1']
@@ -127,6 +131,8 @@ def trigger_download(event):
 def process_file(event):
     """Process the uploaded HTML file and create Excel output."""
     global download_url
+
+    print(f'[examinator_excel_download] processing file...')
     
     file_input = document.getElementById(FILE_INPUT_ID)
     if not file_input.files.length:
@@ -174,7 +180,7 @@ def process_file(event):
 
 
 # Event listeners
-document.getElementById(FILE_INPUT_ID).addEventListener(
+document.addEventListener(
     'process-excel', create_proxy(process_file)
 )
 document.getElementById(DOWNLOAD_BUTTON_ID).addEventListener(
