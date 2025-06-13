@@ -4,11 +4,12 @@
  */
 
 // Constants
-const DOWNLOAD_BUTTON_AUTOMATION_ID = 'download-automation-examinator';
-const AUTOMATION_STATUS_ID = 'automation-status-examinator';
+const DOWNLOAD_BUTTON_AUTOMATION_ID = 'download-examinator';
+const AUTOMATION_STATUS_ID = 'status-examinator';
+const FILTER_CONFIG_AREA_ID = 'filter-config-area'; // Added for filter UI
+const ADD_FILTER_TAB_BUTTON_ID = 'add-filter-tab-button'; // Added for filter UI
 
-// Default report configuration for examinator data
-const DEFAULT_REPORT_CONFIG = {
+let currentReportConfig = {
     reportname: "9.1.06", // Rapportcode zoals gebruikt in Osiris
     fileType: "html",    // Gewenst bestandstype
     filters: [
@@ -18,10 +19,110 @@ const DEFAULT_REPORT_CONFIG = {
         },
         {
             tab: "cursus",
-            fields: [{ name: "collegejaar", value: "2024" }, { name: "cursus", value: "TICT-AFSTUD-19" }], // As per user request
+            fields: [{ name: "collegejaar", value: "2024" }, { name: "cursus", value: "TICT-AFSTUD-19" }],
         },
     ],
 };
+
+/**
+ * Renders the filter configuration UI based on currentReportConfig.
+ */
+function renderFilterConfigUI() {
+    const configArea = document.getElementById(FILTER_CONFIG_AREA_ID);
+    if (!configArea) return;
+
+    configArea.innerHTML = ''; // Clear existing UI
+
+    currentReportConfig.filters.forEach((tabConfig, tabIndex) => {
+        const tabDiv = document.createElement('div');
+        tabDiv.className = 'mb-3 p-2 border rounded';
+
+        const tabHeader = document.createElement('div');
+        tabHeader.className = 'd-flex justify-content-between align-items-center mb-2';
+
+        const tabNameInput = document.createElement('input');
+        tabNameInput.type = 'text';
+        tabNameInput.className = 'form-control form-control-sm d-inline-block w-auto';
+        tabNameInput.value = tabConfig.tab;
+        tabNameInput.placeholder = 'Tab Naam';
+        tabNameInput.addEventListener('change', (e) => {
+            currentReportConfig.filters[tabIndex].tab = e.target.value;
+        });
+        tabHeader.appendChild(tabNameInput);
+
+        const removeTabButton = document.createElement('button');
+        removeTabButton.type = 'button';
+        removeTabButton.className = 'btn btn-danger btn-sm';
+        removeTabButton.textContent = 'Tab Verwijderen';
+        removeTabButton.addEventListener('click', () => {
+            currentReportConfig.filters.splice(tabIndex, 1);
+            renderFilterConfigUI(); // Re-render
+        });
+        tabHeader.appendChild(removeTabButton);
+        tabDiv.appendChild(tabHeader);
+
+        const fieldsDiv = document.createElement('div');
+        fieldsDiv.className = 'ms-3';
+
+        tabConfig.fields.forEach((field, fieldIndex) => {
+            const fieldGroup = document.createElement('div');
+            fieldGroup.className = 'input-group input-group-sm mb-2';
+
+            const fieldNameInput = document.createElement('input');
+            fieldNameInput.type = 'text';
+            fieldNameInput.className = 'form-control';
+            fieldNameInput.value = field.name;
+            fieldNameInput.placeholder = 'Veld Naam';
+            fieldNameInput.addEventListener('change', (e) => {
+                currentReportConfig.filters[tabIndex].fields[fieldIndex].name = e.target.value;
+            });
+
+            const fieldValueInput = document.createElement('input');
+            fieldValueInput.type = 'text';
+            fieldValueInput.className = 'form-control';
+            fieldValueInput.value = field.value;
+            fieldValueInput.placeholder = 'Veld Waarde';
+            fieldValueInput.addEventListener('change', (e) => {
+                currentReportConfig.filters[tabIndex].fields[fieldIndex].value = e.target.value;
+            });
+
+            const removeFieldButton = document.createElement('button');
+            removeFieldButton.type = 'button';
+            removeFieldButton.className = 'btn btn-outline-danger';
+            removeFieldButton.textContent = 'X';
+            removeFieldButton.addEventListener('click', () => {
+                currentReportConfig.filters[tabIndex].fields.splice(fieldIndex, 1);
+                renderFilterConfigUI(); // Re-render
+            });
+
+            fieldGroup.appendChild(fieldNameInput);
+            fieldGroup.appendChild(fieldValueInput);
+            fieldGroup.appendChild(removeFieldButton);
+            fieldsDiv.appendChild(fieldGroup);
+        });
+
+        const addFieldButton = document.createElement('button');
+        addFieldButton.type = 'button';
+        addFieldButton.className = 'btn btn-outline-success btn-sm';
+        addFieldButton.textContent = 'Veld Toevoegen';
+        addFieldButton.addEventListener('click', () => {
+            currentReportConfig.filters[tabIndex].fields.push({ name: '', value: '' });
+            renderFilterConfigUI(); // Re-render
+        });
+
+        fieldsDiv.appendChild(addFieldButton);
+        tabDiv.appendChild(fieldsDiv);
+        configArea.appendChild(tabDiv);
+    });
+}
+
+/**
+ * Adds a new filter tab to the configuration and re-renders the UI.
+ */
+function addFilterTab() {
+    currentReportConfig.filters.push({ tab: `NieuweTab${currentReportConfig.filters.length + 1}`, fields: [{ name: '', value: '' }] });
+    renderFilterConfigUI();
+}
 
 /**
  * Update the automation status display.
@@ -66,7 +167,7 @@ function triggerAutomatedDownload() {
         source: 'osiris-web', // Source identifier expected by the extension's content script
         payload: {
             type: 'NAVIGATE_AND_OPEN_REPORT',
-            reportConfig: DEFAULT_REPORT_CONFIG
+            reportConfig: currentReportConfig // Use the potentially modified config
         }
     }, '*'); // Target all origins, as the extension content script will filter
 }
@@ -95,13 +196,6 @@ function handleExtensionMessage(event) {
             }
             break;
 
-        case 'DOWNLOAD_ERROR':
-            updateAutomationStatus(
-                `Fout bij downloaden via extensie: ${payload.error || 'Onbekende fout'}`,
-                'error'
-            );
-            break;
-
         default:
             console.log('Onbekend bericht ontvangen van extensie-relay:', payload);
             break;
@@ -123,7 +217,16 @@ function initializeAutomation() {
         console.error(`Button with ID '${DOWNLOAD_BUTTON_AUTOMATION_ID}' not found.`);
     }
 
-    // Initially hide the status
+    // Set up the add filter tab button
+    const addTabButton = document.getElementById(ADD_FILTER_TAB_BUTTON_ID);
+    if (addTabButton) {
+        addTabButton.addEventListener('click', addFilterTab);
+    } else {
+        console.error(`Button with ID '${ADD_FILTER_TAB_BUTTON_ID}' not found.`);
+    }
+
+    // Initially render the filter UI and hide the status
+    renderFilterConfigUI();
     hideAutomationStatus();
 }
 

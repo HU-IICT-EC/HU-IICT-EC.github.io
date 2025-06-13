@@ -1,62 +1,62 @@
 <section>
   <h3>Examinator Excel Download</h3>
-
-  <!-- Automation Status Display -->
-  <div id="automation-status-examinator" class="alert mt-2" style="display: none;" role="alert"></div>
-
-  <div class="accordion" id="examinatorAccordion">
-    <!-- Automated Method -->
-    <div class="accordion-item">
-      <h2 class="accordion-header" id="headingAutomated">
-        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAutomated"
-          aria-expanded="true" aria-controls="collapseAutomated">
-          <strong>Methode 1: Automatisch (Aanbevolen)</strong>
-        </button>
-      </h2>
-      <div id="collapseAutomated" class="accordion-collapse collapse show" aria-labelledby="headingAutomated"
-        data-bs-parent="#examinatorAccordion">
-        <div class="accordion-body">
-          <ol>
-            <li>
-              <label>Zorg dat je bent ingelogd op Osiris. Klik vervolgens op de knop hieronder om het rapport
-                automatisch te downloaden via de Osiris Chrome extensie.</label>
-              <div class="mt-2">
-                <button id="download-automation-examinator" class="btn btn-primary" type="button">
-                  Start Automatische Download
-                </button>
-                <div class="form-text mt-1">
-                  De extensie downloadt het rapport (9.1.06, HTML, rol EXAMINATOR, collegejaar 2024) naar je
-                  standaard downloadmap.
+  <div id="status-examinator" class="alert mt-2" style="display: none;" role="alert"></div>
+  <ol>
+    <li>
+      <label>Zorg dat je bent ingelogd op Osiris. Klik vervolgens op de knop hieronder om het rapport
+        automatisch te downloaden via de Osiris Chrome extensie.</label>
+      <div class="mt-2">
+        <div class="accordion mb-3" id="filterAccordion">
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="filterAccordionHeader">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapseFilterConfig" aria-expanded="false" aria-controls="collapseFilterConfig">
+                Rapport Filters Aanpassen
+              </button>
+            </h2>
+            <div id="collapseFilterConfig" class="accordion-collapse collapse" aria-labelledby="filterAccordionHeader"
+              data-bs-parent="#filterAccordion">
+              <div class="accordion-body">
+                <div id="filter-config-area" class="p-3 border rounded bg-light">
+                  <!-- JS will populate this: filter tabs and fields -->
                 </div>
+                <button id="add-filter-tab-button" class="btn btn-outline-primary btn-sm mt-2" type="button">Nieuwe
+                  Filter Tab Toevoegen</button>
               </div>
-            </li>
-            <li>
-              <label for="examinatorFile" class="mt-3">Selecteer het gedownloade HTML-bestand:</label>
-              <input type="file" id="examinatorFile" class="form-control mt-2" accept=".html,.htm"
-                aria-describedby="examinator-help-automated" />
-              <div id="examinator-help-automated" class="form-text">
-                Nadat de automatische download is voltooid, selecteer je hier het HTML-bestand (meestal in je
-                'Downloads'-map).
-              </div>
-            </li>
-            <li>
-              <label class="mt-3">Download het verwerkte Excel-bestand:</label>
-              <div class="mt-2">
-                <span id="processing-indicator-examinator" style="display:none;" aria-live="polite">
-                  <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
-                  Bezig met verwerken...
-                </span>
-                <button id="download-examinator" class="btn btn-success mt-2 disabled" type="button" tabindex="-1"
-                  aria-disabled="true">
-                  Download Excel
-                </button>
-              </div>
-            </li>
-          </ol>
+            </div>
+          </div>
+        </div>
+        <button id="download-examinator" class="btn btn-primary" type="button">
+          Start Download
+        </button>
+        <div class="form-text mt-1">
+          De extensie downloadt het rapport (standaard 9.1.06, HTML) naar je standaard downloadmap, met de hierboven
+          geconfigureerde filters.
         </div>
       </div>
-    </div>
-  </div>
+    </li>
+    <li>
+      <label for="examinatorFile" class="mt-3">Selecteer het gedownloade HTML-bestand:</label>
+      <input type="file" id="examinatorFile" class="form-control mt-2" accept=".html,.htm"
+        aria-describedby="examinator-help-automated" />
+      <div id="examinator-help-automated" class="form-text">
+        Nadat de download is voltooid, selecteer je hier het HTML-bestand (meestal in je 'Downloads'-map).
+      </div>
+    </li>
+    <li>
+      <label class="mt-3">Download het verwerkte Excel-bestand:</label>
+      <div class="mt-2">
+        <span id="processing-indicator-examinator" style="display:none;" aria-live="polite">
+          <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
+          Bezig met verwerken...
+        </span>
+        <button id="download-examinator-processed" class="btn btn-success mt-2 disabled" type="button" tabindex="-1"
+          aria-disabled="true">
+          Download Excel
+        </button>
+      </div>
+    </li>
+  </ol>
 </section>
 
 <py-script src="/assets/tools/examinator_excel_download.py" type="py"></py-script>

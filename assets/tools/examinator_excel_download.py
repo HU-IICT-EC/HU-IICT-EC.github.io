@@ -7,7 +7,7 @@ from openpyxl import load_workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
 
 # Constants
-DOWNLOAD_BUTTON_ID = 'download-examinator'
+DOWNLOAD_BUTTON_ID = 'download-examinator-processed'
 FILE_INPUT_ID = 'examinatorFile'
 PROCESSING_INDICATOR_ID = 'processing-indicator-examinator'
 OUTPUT_FILENAME = 'osiris.xlsx'
