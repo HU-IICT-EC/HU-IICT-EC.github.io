@@ -18,4 +18,4 @@ exclude:
 tools:
   - Examinator_Excel_Download.html
   - Steekproef.html
-  # Add more tool include filenames here
+  - Instellingen.html

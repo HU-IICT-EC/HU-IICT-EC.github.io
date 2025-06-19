@@ -32,27 +32,55 @@ layout: none
             <div class="col-md-3 mb-4">
                 <div class="nav flex-column nav-pills side-tabs" id="tool-tabs" role="tablist"
                     aria-orientation="vertical">
-                    {% for tool in site.tools %}
-                    {% assign tool_name = tool | split: '.' | first %}
-                    <button class="nav-link {% if forloop.first %}active{% endif %}" id="tab-{{ tool_name }}-tab"
-                        data-bs-toggle="tab" data-bs-target="#tab-{{ tool_name }}" type="button" role="tab"
-                        aria-controls="tab-{{ tool_name }}"
-                        aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+                    {% assign sorted_tools = site.tools | where_exp:"item", "item != 'Instellingen.html'" %}
+                    {% assign settings_tool = site.tools | where_exp:"item", "item == 'Instellingen.html'" | first %}
+
+                    {% for tool_path in sorted_tools %}
+                    {% assign tool_name = tool_path | split: '.' | first %}
+                    <button class="nav-link {% if forloop.first and settings_tool == nil %}active{% endif %}"
+                        id="tab-{{ tool_name }}-tab" data-bs-toggle="tab" data-bs-target="#tab-{{ tool_name }}"
+                        type="button" role="tab" aria-controls="tab-{{ tool_name }}"
+                        aria-selected="{% if forloop.first and settings_tool == nil %}true{% else %}false{% endif %}">
                         {{ tool_name | replace: "_", " " }}
                     </button>
                     {% endfor %}
+
+                    {% if settings_tool %}
+                    {% assign tool_name = settings_tool | split: '.' | first %}
+                    <button class="nav-link {% if sorted_tools == empty %}active{% endif %}"
+                        id="tab-{{ tool_name }}-tab" data-bs-toggle="tab" data-bs-target="#tab-{{ tool_name }}"
+                        type="button" role="tab" aria-controls="tab-{{ tool_name }}"
+                        aria-selected="{% if sorted_tools == empty %}true{% else %}false{% endif %}">
+                        {{ tool_name | replace: "_", " " }}
+                    </button>
+                    {% endif %}
                 </div>
             </div>
 
             <!-- Tab Content -->
             <div class="col-md-9">
                 <div class="tab-content" id="tool-tabs-content">
-                    {% for tool in site.tools %}
-                    {% assign tool_name = tool | split: '.' | first %}
-                    <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="tab-{{ tool_name }}"
-                        role="tabpanel" aria-labelledby="tab-{{ tool_name }}-tab">
-                        {% include tools/{{ tool }} %} </div>
+                    {% assign sorted_tools_content = site.tools | where_exp:"item", "item != 'Instellingen.html'" %}
+                    {% assign settings_tool_content = site.tools | where_exp:"item", "item == 'Instellingen.html'" |
+                    first %}
+
+                    {% for tool_path_content in sorted_tools_content %}
+                    {% assign tool_name_content = tool_path_content | split: '.' | first %}
+                    <div class="tab-pane fade {% if forloop.first and settings_tool_content == nil %}show active{% endif %}"
+                        id="tab-{{ tool_name_content }}" role="tabpanel"
+                        aria-labelledby="tab-{{ tool_name_content }}-tab">
+                        {% include tools/{{ tool_path_content }} %}
+                    </div>
                     {% endfor %}
+
+                    {% if settings_tool_content %}
+                    {% assign tool_name_content = settings_tool_content | split: '.' | first %}
+                    <div class="tab-pane fade {% if sorted_tools_content == empty %}show active{% endif %}"
+                        id="tab-{{ tool_name_content }}" role="tabpanel"
+                        aria-labelledby="tab-{{ tool_name_content }}-tab">
+                        {% include tools/{{ settings_tool_content }} %}
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

@@ -1,0 +1,50 @@
+<div class="container">
+    <h2>Instellingen</h2>
+
+    <section id="extension-download" class="mb-4">
+        <h4>Osiris Chrome Extensie</h4>
+        <p>Download de extensie om de functionaliteit van deze tools te verbeteren.</p>
+        <p id="extension-status">Status: <span class="fw-bold">Bezig met controleren...</span></p>
+        <a href="/assets/osiris-chrome-extension.zip" class="btn btn-primary mb-2" download>Download Extensie (.zip)</a>
+
+        <div class="accordion" id="accordionInstallInstructions">
+            <div class="accordion-item">
+                <h5 class="accordion-header" id="headingOne">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#install-instructions" aria-expanded="false"
+                        aria-controls="install-instructions">
+                        Installatie Instructies (Nederlands)
+                    </button>
+                </h5>
+                <div id="install-instructions" class="accordion-collapse collapse" aria-labelledby="headingOne"
+                    data-bs-parent="#accordionInstallInstructions">
+                    <div class="accordion-body">
+                        <ol>
+                            <li>Download het .zip bestand hierboven.</li>
+                            <li>Pak het .zip bestand uit in een map op uw computer.</li>
+                            <li>Open Google Chrome en ga naar <code>chrome://extensions</code>.</li>
+                            <li>Schakel rechtsboven de "Ontwikkelaarsmodus" (Developer mode) in.</li>
+                            <li>Klik op de knop "Uitgepakte extensie laden" (Load unpacked).</li>
+                            <li>Selecteer de map waarin u de bestanden heeft uitgepakt.</li>
+                            <li>De extensie zou nu geïnstalleerd en actief moeten zijn.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr>
+
+    <section id="persistent-storage" class="mb-4">
+        <h4>Permanente Bestandsopslag Toestemming</h4>
+        <p>Geef toestemming voor deze website (<code><span id="current-domain"></span></code>) om bestanden permanent op
+            te slaan in uw downloadmap. Dit is nodig voor sommige tools om correct te functioneren.</p>
+        <button id="request-permission-btn" class="btn btn-success">Downloadmap Selecteren</button>
+        <div id="permission-status" class="mt-2"></div>
+        <p class="mt-2"><small>Let op: Deze functionaliteit gebruikt de File System Access API en werkt in moderne
+                browsers zoals Chrome, Edge, en Opera.</small></p>
+    </section>
+
+</div>
+<script src="/assets/tools/instellingen.js"></script>
