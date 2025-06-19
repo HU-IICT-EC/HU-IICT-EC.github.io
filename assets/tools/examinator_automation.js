@@ -25,6 +25,159 @@ let currentReportConfig = {
 };
 
 /**
+ * Check if file system permissions are available and granted.
+ * @returns {Promise<boolean>} True if permissions are available and granted.
+ */
+async function hasFileSystemPermission() {
+    try {
+        // Check if File System Access API is supported
+        if (!('showDirectoryPicker' in window)) {
+            return false;
+        }
+
+        // Check if we have a stored directory handle
+        const permissionInfo = await getStoredDirectoryHandle();
+        if (!permissionInfo) {
+            return false;
+        }
+
+        // Verify the handle still has permission
+        const permission = await permissionInfo.handle.queryPermission({ mode: 'readwrite' });
+        return permission === 'granted';
+    } catch (error) {
+        console.error('Error checking file system permission:', error);
+        return false;
+    }
+}
+
+/**
+ * Get stored directory handle from IndexedDB.
+ * @returns {Promise<Object|null>} Directory handle info or null if not found.
+ */
+async function getStoredDirectoryHandle() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open('FileSystemHandles', 1);
+
+        request.onerror = () => reject(request.error);
+
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains('handles')) {
+                db.createObjectStore('handles');
+            }
+        };
+
+        request.onsuccess = (event) => {
+            const db = event.target.result;
+            const transaction = db.transaction(['handles'], 'readonly');
+            const store = transaction.objectStore('handles');
+
+            const getRequest = store.get(`downloadFolder_${window.location.hostname}`);
+
+            getRequest.onsuccess = () => {
+                resolve(getRequest.result);
+            };
+
+            getRequest.onerror = () => reject(getRequest.error);
+        };
+    });
+}
+
+/**
+ * Auto-process downloaded file using file system permissions.
+ * @param {string} filename - The name of the downloaded file.
+ */
+async function autoProcessDownloadedFile(filename) {
+    try {
+        const permissionInfo = await getStoredDirectoryHandle();
+        if (!permissionInfo) {
+            console.warn('No directory handle available for auto-processing');
+            updateAutomationStatus('Geen toestemming voor automatisch verwerken. Selecteer bestand handmatig.', 'error');
+            return;
+        }
+
+        updateAutomationStatus('Bezig met automatisch verwerken van gedownload bestand...', 'info');
+
+        // Get the file from the directory
+        const fileHandle = await permissionInfo.handle.getFileHandle(filename);
+        const file = await fileHandle.getFile();
+
+        // Check if it's an HTML file
+        if (!file.name.toLowerCase().endsWith('.html') && !file.name.toLowerCase().endsWith('.htm')) {
+            throw new Error('Het gedownloade bestand is geen HTML-bestand');
+        }
+
+        // Trigger the same processing as manual file selection
+        await processFileContent(file);
+
+    } catch (error) {
+        console.error('Error auto-processing downloaded file:', error);
+
+        if (error.name === 'NotFoundError') {
+            updateAutomationStatus(`Bestand "${filename}" niet gevonden in downloadmap. Controleer of de download is voltooid.`, 'error');
+        } else {
+            updateAutomationStatus(`Fout bij automatisch verwerken: ${error.message}. Gebruik handmatige selectie.`, 'error');
+        }
+    }
+}
+
+/**
+ * Process file content (extracted from manual processing logic).
+ * @param {File} file - The file to process.
+ */
+async function processFileContent(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            try {
+                // Trigger the Python processing by setting the file and dispatching the event
+                const fileInput = document.getElementById('examinatorFile');
+
+                // Create a mock file list to satisfy the Python script expectations
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+
+                // Trigger the processing event
+                fileInput.dispatchEvent(new Event('process-excel'));
+
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        };
+
+        reader.onerror = () => reject(reader.error);
+        reader.readAsText(file);
+    });
+}
+
+/**
+ * Update UI based on file system permissions availability.
+ */
+async function updateUIForPermissions() {
+    const hasPermission = await hasFileSystemPermission();
+
+    const manualStep = document.getElementById('manual-file-selection-step');
+    const autoStep = document.getElementById('auto-processing-step');
+
+    if (hasPermission) {
+        // Hide manual file selection, show auto processing message
+        if (manualStep) manualStep.style.display = 'none';
+        if (autoStep) autoStep.style.display = 'block';
+
+        console.log('[examinator_automation] Auto-processing enabled due to file system permissions');
+    } else {
+        // Show manual file selection, hide auto processing message
+        if (manualStep) manualStep.style.display = 'block';
+        if (autoStep) autoStep.style.display = 'none';
+
+        console.log('[examinator_automation] Manual file selection required - no file system permissions');
+    }
+}
+
+/**
  * Renders the filter configuration UI based on currentReportConfig.
  */
 function renderFilterConfigUI() {
@@ -190,7 +343,19 @@ function handleExtensionMessage(event) {
     switch (payload.type) {
         case 'DOWNLOAD_COMPLETED':
             if (payload.filename) {
-                updateAutomationStatus(`Download van ${payload.filename} voltooid.`, 'info');
+                updateAutomationStatus(`Download van ${payload.filename} voltooid.`, 'success');
+
+                // Check if we should auto-process the file
+                hasFileSystemPermission().then(hasPermission => {
+                    if (hasPermission) {
+                        // Wait a moment for the file to be fully written
+                        setTimeout(async () => {
+                            await autoProcessDownloadedFile(payload.filename);
+                        }, 1000);
+                    } else {
+                        updateAutomationStatus('Download voltooid. Selecteer het bestand handmatig in stap 2.', 'info');
+                    }
+                });
             } else {
                 updateAutomationStatus('Download voltooid, maar bestandsnaam niet ontvangen. Controleer je downloadmap.', 'error');
             }
@@ -201,6 +366,13 @@ function handleExtensionMessage(event) {
             break;
     }
 }
+
+// Listen for when the Python processing completes successfully
+document.addEventListener('excelProcessingComplete', () => {
+    if (document.getElementById('auto-processing-step').style.display !== 'none') {
+        updateAutomationStatus('Bestand automatisch verwerkt! Excel-bestand is klaar voor download.', 'success');
+    }
+});
 
 /**
  * Initialize the automation functionality.
@@ -228,6 +400,12 @@ function initializeAutomation() {
     // Initially render the filter UI and hide the status
     renderFilterConfigUI();
     hideAutomationStatus();
+
+    // Update UI based on file system permissions
+    updateUIForPermissions();
+
+    // Listen for changes in permission status (e.g., when user navigates from settings page)
+    window.addEventListener('focus', updateUIForPermissions);
 }
 
 document.getElementById('examinatorFile').addEventListener('change', function () {

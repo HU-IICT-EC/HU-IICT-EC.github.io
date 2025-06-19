@@ -35,12 +35,22 @@
         </div>
       </div>
     </li>
-    <li>
+    <li id="manual-file-selection-step">
       <label for="examinatorFile" class="mt-3">Selecteer het gedownloade HTML-bestand:</label>
       <input type="file" id="examinatorFile" class="form-control mt-2" accept=".html,.htm"
         aria-describedby="examinator-help-automated" />
       <div id="examinator-help-automated" class="form-text">
         Nadat de download is voltooid, selecteer je hier het HTML-bestand (meestal in je 'Downloads'-map).
+      </div>
+    </li>
+    <li id="auto-processing-step" style="display: none;">
+      <div class="mt-3">
+        <span class="text-success">
+          ✓ Het gedownloade bestand wordt automatisch verwerkt wanneer de download voltooid is.
+        </span>
+        <div class="form-text">
+          Door de ingestelde downloadmap toestemming wordt het HTML-bestand automatisch gelezen en verwerkt.
+        </div>
       </div>
     </li>
     <li>

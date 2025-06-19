@@ -169,6 +169,11 @@ def process_file(event):
             
             _enable_download_button()
 
+            # Dispatch event to notify that processing is complete
+            event = document.createEvent('Event')
+            event.initEvent('excelProcessingComplete', True, True)
+            document.dispatchEvent(event)
+
         except Exception as err:
             error_msg = f'Fout bij verwerken bestand: {err}'
             print(f'[examinator_excel_download] {error_msg}')
