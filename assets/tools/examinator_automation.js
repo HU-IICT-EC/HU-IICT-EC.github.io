@@ -98,8 +98,27 @@ async function autoProcessDownloadedFile(filename) {
 
         updateAutomationStatus('Bezig met automatisch verwerken van gedownload bestand...', 'info');
 
-        // Get the file from the directory
-        const fileHandle = await permissionInfo.handle.getFileHandle(filename);
+        // Log the filename for debugging
+        console.log(`[examinator_automation] Original filename: "${filename}"`);
+
+        // Extract just the filename from potential full path and sanitize
+        let baseFilename = filename.split(/[/\\]/).pop() || filename;
+
+        // Remove URL parameters and fragments if present
+        baseFilename = baseFilename.split(/[?#]/)[0];
+
+        console.log(`[examinator_automation] Base filename: "${baseFilename}""`);
+
+        // First try: exact match with sanitized filename
+        let fileHandle;
+        try {
+            console.log(`[examinator_automation] Trying exact match: "${baseFilename}"`);
+            fileHandle = await permissionInfo.handle.getFileHandle(baseFilename);
+            console.log(`[examinator_automation] Found exact match: "${baseFilename}"`);
+        } catch (getFileError) {
+            console.log(`[examinator_automation] Exact match failed: ${getFileError.message}`);
+        }
+
         const file = await fileHandle.getFile();
 
         // Check if it's an HTML file
@@ -115,6 +134,8 @@ async function autoProcessDownloadedFile(filename) {
 
         if (error.name === 'NotFoundError') {
             updateAutomationStatus(`Bestand "${filename}" niet gevonden in downloadmap. Controleer of de download is voltooid.`, 'error');
+        } else if (error.name === 'TypeError' && error.message.includes('Name is not allowed')) {
+            updateAutomationStatus(`Ongeldige bestandsnaam: "${filename}". Gebruik handmatige selectie.`, 'error');
         } else {
             updateAutomationStatus(`Fout bij automatisch verwerken: ${error.message}. Gebruik handmatige selectie.`, 'error');
         }
@@ -416,7 +437,6 @@ document.getElementById('examinatorFile').addEventListener('change', function ()
         document.getElementById('examinatorFile').dispatchEvent(new Event('process-excel'));
     }, 50);
 });
-
 
 // Initialize when DOM is loaded
 if (document.readyState === 'loading') {
