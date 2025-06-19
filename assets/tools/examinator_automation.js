@@ -19,7 +19,7 @@ let currentReportConfig = {
         },
         {
             tab: "cursus",
-            fields: [{ name: "collegejaar", value: "2024" }, { name: "cursus", value: "TICT-AFSTUD-19" }],
+            fields: [{ name: "collegejaar", value: new Date(new Date().setMonth(new Date().getMonth() - 9)).getFullYear().toString() }],
         },
     ],
 };
@@ -182,17 +182,26 @@ async function updateUIForPermissions() {
 
     const manualStep = document.getElementById('manual-file-selection-step');
     const autoStep = document.getElementById('auto-processing-step');
+    const autoDownloadStep = document.getElementById('auto-download-step');
+    const manualDownloadHelp = document.getElementById('manual-download-help');
+    const autoDownloadHelp = document.getElementById('auto-download-help');
 
     if (hasPermission) {
-        // Hide manual file selection, show auto processing message
+        // Hide manual file selection, show auto processing and auto download messages
         if (manualStep) manualStep.style.display = 'none';
         if (autoStep) autoStep.style.display = 'block';
+        if (autoDownloadStep) autoDownloadStep.style.display = 'block';
+        if (manualDownloadHelp) manualDownloadHelp.style.display = 'none';
+        if (autoDownloadHelp) autoDownloadHelp.style.display = 'block';
 
-        console.log('[examinator_automation] Auto-processing enabled due to file system permissions');
+        console.log('[examinator_automation] Auto-processing and auto-download enabled due to file system permissions');
     } else {
-        // Show manual file selection, hide auto processing message
+        // Show manual file selection, hide auto processing and auto download messages
         if (manualStep) manualStep.style.display = 'block';
         if (autoStep) autoStep.style.display = 'none';
+        if (autoDownloadStep) autoDownloadStep.style.display = 'none';
+        if (manualDownloadHelp) manualDownloadHelp.style.display = 'block';
+        if (autoDownloadHelp) autoDownloadHelp.style.display = 'none';
 
         console.log('[examinator_automation] Manual file selection required - no file system permissions');
     }
@@ -389,8 +398,20 @@ function handleExtensionMessage(event) {
 }
 
 // Listen for when the Python processing completes successfully
-document.addEventListener('excelProcessingComplete', () => {
-    if (document.getElementById('auto-processing-step').style.display !== 'none') {
+document.addEventListener('excelProcessingComplete', async (event) => {
+    const hasPermission = await hasFileSystemPermission();
+    const autoStepVisible = document.getElementById('auto-processing-step').style.display !== 'none';
+
+    if (hasPermission && autoStepVisible) {
+        try {
+            const autoSaveEvent = new CustomEvent('requestAutoSave');
+            document.dispatchEvent(autoSaveEvent);
+
+        } catch (error) {
+            console.error('Error triggering auto-download:', error);
+            updateAutomationStatus('Excel bestand verwerkt. Klik op "Download Excel" om te downloaden.', 'success');
+        }
+    } else if (autoStepVisible) {
         updateAutomationStatus('Bestand automatisch verwerkt! Excel-bestand is klaar voor download.', 'success');
     }
 });

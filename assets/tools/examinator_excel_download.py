@@ -10,7 +10,7 @@ from openpyxl.worksheet.table import Table, TableStyleInfo
 DOWNLOAD_BUTTON_ID = 'download-examinator-processed'
 FILE_INPUT_ID = 'examinatorFile'
 PROCESSING_INDICATOR_ID = 'processing-indicator-examinator'
-OUTPUT_FILENAME = 'osiris.xlsx'
+OUTPUT_FILENAME = 'examinatoren_osiris.xlsx'
 TABLE_NAME = 'ExaminatorTable'
 TABLE_STYLE = 'TableStyleMedium2'
 
@@ -183,11 +183,13 @@ def process_file(event):
     reader.onload = create_proxy(onload)
     reader.readAsText(file)
 
-
 # Event listeners
 document.getElementById(FILE_INPUT_ID).addEventListener(
     'process-excel', create_proxy(process_file)
 )
 document.getElementById(DOWNLOAD_BUTTON_ID).addEventListener(
     'click', create_proxy(trigger_download)
+)
+document.addEventListener(
+    'requestAutoSave', create_proxy(trigger_download)
 )
