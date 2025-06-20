@@ -36,11 +36,26 @@
       </div>
     </li>
     <li id="manual-file-selection-step">
-      <label for="examinatorFile" class="mt-3">Selecteer het gedownloade HTML-bestand:</label>
-      <input type="file" id="examinatorFile" class="form-control mt-2" accept=".html,.htm"
-        aria-describedby="examinator-help-automated" />
-      <div id="examinator-help-automated" class="form-text">
-        Nadat de download is voltooid, selecteer je hier het HTML-bestand (meestal in je 'Downloads'-map).
+      <div class="accordion mt-3" id="manualFileAccordion">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="manualFileAccordionHeader">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+              data-bs-target="#collapseManualFile" aria-expanded="false" aria-controls="collapseManualFile">
+              Handmatig Bestand Selecteren
+            </button>
+          </h2>
+          <div id="collapseManualFile" class="accordion-collapse collapse" aria-labelledby="manualFileAccordionHeader"
+            data-bs-parent="#manualFileAccordion">
+            <div class="accordion-body">
+              <label for="examinatorFile">Selecteer het gedownloade HTML-bestand:</label>
+              <input type="file" id="examinatorFile" class="form-control mt-2" accept=".html,.htm"
+                aria-describedby="examinator-help-automated" />
+              <div id="examinator-help-automated" class="form-text">
+                Nadat de download is voltooid, selecteer je hier het HTML-bestand (meestal in je 'Downloads'-map).
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </li>
     <li id="auto-processing-step" style="display: none;">

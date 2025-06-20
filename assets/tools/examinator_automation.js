@@ -176,8 +176,8 @@ async function updateUIForPermissions() {
     const autoDownloadHelp = document.getElementById('auto-download-help');
 
     if (hasPermission) {
-        // Hide manual file selection, show auto processing and auto download messages
-        if (manualStep) manualStep.style.display = 'none';
+        // Keep manual file selection visible but collapsed, show auto processing and auto download messages
+        if (manualStep) manualStep.style.display = 'block';
         if (autoStep) autoStep.style.display = 'block';
         if (autoDownloadStep) autoDownloadStep.style.display = 'block';
         if (manualDownloadHelp) manualDownloadHelp.style.display = 'none';
@@ -185,12 +185,18 @@ async function updateUIForPermissions() {
 
         console.log('[examinator_automation] Auto-processing and auto-download enabled due to file system permissions');
     } else {
-        // Show manual file selection, hide auto processing and auto download messages
+        // Show manual file selection expanded, hide auto processing and auto download messages
         if (manualStep) manualStep.style.display = 'block';
         if (autoStep) autoStep.style.display = 'none';
         if (autoDownloadStep) autoDownloadStep.style.display = 'none';
         if (manualDownloadHelp) manualDownloadHelp.style.display = 'block';
         if (autoDownloadHelp) autoDownloadHelp.style.display = 'none';
+
+        // When no automation is available, expand the manual file selection accordion
+        const manualFileAccordion = document.getElementById('collapseManualFile');
+        if (manualFileAccordion) {
+            const bsCollapse = new bootstrap.Collapse(manualFileAccordion, { show: true });
+        }
 
         console.log('[examinator_automation] Manual file selection required - no file system permissions');
     }
