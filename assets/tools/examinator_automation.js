@@ -21,7 +21,7 @@ let currentReportConfig = {
     filters: [
         {
             tab: "docent",
-            fields: [{ name: "rol", value: "EXAMINATOR" }],
+            fields: [{ name: "Medewerkergroep", value: "TICT-EXAMIN" }, { name: "rol", value: "EXAMINATOR" }],
         },
         {
             tab: "cursus",
@@ -380,8 +380,39 @@ function handleExtensionMessage(event) {
             }
             break;
 
+        case 'ERROR':
+        case 'NAVIGATION_ERROR':
+            // Handle extension errors
+            let errorMessage = 'Er is een fout opgetreden bij het automatisch downloaden.';
+
+            if (payload.content) {
+                if (payload.content.includes('No Osiris tab found')) {
+                    errorMessage = 'Geen Osiris tabblad gevonden. Zorg ervoor dat je bent ingelogd op Osiris in een ander tabblad.';
+                } else {
+                    errorMessage = `Fout bij automatisch downloaden: ${payload.content}`;
+                }
+            }
+
+            updateAutomationStatus(errorMessage, 'error');
+            break;
+
         default:
-            console.log('Onbekend bericht ontvangen van extensie-relay:', payload);
+            // Handle unknown messages that might contain error information
+            if (payload.success === false) {
+                let errorMessage = 'Er is een fout opgetreden bij het automatisch downloaden.';
+
+                if (payload.content) {
+                    if (payload.content.includes('No Osiris tab found')) {
+                        errorMessage = 'Geen Osiris tabblad gevonden. Zorg ervoor dat je bent ingelogd op Osiris in een ander tabblad.';
+                    } else {
+                        errorMessage = `Fout bij automatisch downloaden: ${payload.content}`;
+                    }
+                }
+
+                updateAutomationStatus(errorMessage, 'error');
+            } else {
+                console.log('Onbekend bericht ontvangen van extensie-relay:', payload);
+            }
             break;
     }
 }
