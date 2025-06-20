@@ -7,7 +7,6 @@
     "fetch": [
         {
             "files": [
-                "./examinator_excel_download.py",
                 "./steekproef.py"
             ]
         }

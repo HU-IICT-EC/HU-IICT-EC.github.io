@@ -3,11 +3,17 @@
  * Handles communication with the Osiris Chrome extension for automated report downloading.
  */
 
-// Constants
+// Constants for automation functionality
 const DOWNLOAD_BUTTON_AUTOMATION_ID = 'download-examinator';
 const AUTOMATION_STATUS_ID = 'status-examinator';
-const FILTER_CONFIG_AREA_ID = 'filter-config-area'; // Added for filter UI
-const ADD_FILTER_TAB_BUTTON_ID = 'add-filter-tab-button'; // Added for filter UI
+const FILTER_CONFIG_AREA_ID = 'filter-config-area';
+const ADD_FILTER_TAB_BUTTON_ID = 'add-filter-tab-button';
+
+// Excel processing constants (migrated from Python)
+const DOWNLOAD_BUTTON_ID = 'download-examinator-processed';
+const FILE_INPUT_ID = 'examinatorFile';
+const PROCESSING_INDICATOR_ID = 'processing-indicator-examinator';
+const OUTPUT_FILENAME = 'examinatoren_osiris.xlsx';
 
 let currentReportConfig = {
     reportname: "9.1.06", // Rapportcode zoals gebruikt in Osiris
@@ -23,6 +29,8 @@ let currentReportConfig = {
         },
     ],
 };
+
+let downloadUrl = null;
 
 /**
  * Check if file system permissions are available and granted.
@@ -143,35 +151,16 @@ async function autoProcessDownloadedFile(filename) {
 }
 
 /**
- * Process file content (extracted from manual processing logic).
+ * Process file content (updated to use JavaScript instead of Python).
  * @param {File} file - The file to process.
  */
 async function processFileContent(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-
-        reader.onload = (e) => {
-            try {
-                // Trigger the Python processing by setting the file and dispatching the event
-                const fileInput = document.getElementById('examinatorFile');
-
-                // Create a mock file list to satisfy the Python script expectations
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(file);
-                fileInput.files = dataTransfer.files;
-
-                // Trigger the processing event
-                fileInput.dispatchEvent(new Event('process-excel'));
-
-                resolve();
-            } catch (error) {
-                reject(error);
-            }
-        };
-
-        reader.onerror = () => reject(reader.error);
-        reader.readAsText(file);
-    });
+    try {
+        await processHtmlFile(file);
+    } catch (error) {
+        console.error('Error processing file content:', error);
+        throw error;
+    }
 }
 
 /**
@@ -397,16 +386,16 @@ function handleExtensionMessage(event) {
     }
 }
 
-// Listen for when the Python processing completes successfully
+// Listen for when the Excel processing completes successfully
 document.addEventListener('excelProcessingComplete', async (event) => {
     const hasPermission = await hasFileSystemPermission();
     const autoStepVisible = document.getElementById('auto-processing-step').style.display !== 'none';
 
     if (hasPermission && autoStepVisible) {
         try {
-            const autoSaveEvent = new CustomEvent('requestAutoSave');
-            document.dispatchEvent(autoSaveEvent);
-
+            // Automatically trigger the download
+            triggerExcelDownload();
+            updateAutomationStatus('Excel bestand automatisch gedownload!', 'success');
         } catch (error) {
             console.error('Error triggering auto-download:', error);
             updateAutomationStatus('Excel bestand verwerkt. Klik op "Download Excel" om te downloaden.', 'success');
@@ -439,6 +428,28 @@ function initializeAutomation() {
         console.error(`Button with ID '${ADD_FILTER_TAB_BUTTON_ID}' not found.`);
     }
 
+    // Set up the Excel download button
+    const excelDownloadButton = document.getElementById(DOWNLOAD_BUTTON_ID);
+    if (excelDownloadButton) {
+        excelDownloadButton.addEventListener('click', triggerExcelDownload);
+    }
+
+    // Set up file input change handler
+    const fileInput = document.getElementById(FILE_INPUT_ID);
+    if (fileInput) {
+        fileInput.addEventListener('change', function () {
+            const indicator = document.getElementById(PROCESSING_INDICATOR_ID);
+            if (indicator) {
+                indicator.style.display = 'inline-block';
+            }
+
+            // Process the file after a short delay to allow UI update
+            setTimeout(() => {
+                processHtmlFile();
+            }, 50);
+        });
+    }
+
     // Initially render the filter UI and hide the status
     renderFilterConfigUI();
     hideAutomationStatus();
@@ -450,18 +461,315 @@ function initializeAutomation() {
     window.addEventListener('focus', updateUIForPermissions);
 }
 
-document.getElementById('examinatorFile').addEventListener('change', function () {
-    const indicator = document.getElementById('processing-indicator-examinator');
-    indicator.style.display = 'inline-block';
-
-    setTimeout(function () {
-        document.getElementById('examinatorFile').dispatchEvent(new Event('process-excel'));
-    }, 50);
-});
-
 // Initialize when DOM is loaded
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeAutomation);
 } else {
     initializeAutomation(); // DOMContentLoaded has already fired
+}
+
+/**
+ * Reset the download button to disabled state.
+ */
+function resetDownloadButton() {
+    const link = document.getElementById(DOWNLOAD_BUTTON_ID);
+    if (link) {
+        link.classList.add('disabled');
+        link.setAttribute('aria-disabled', 'true');
+        link.style.pointerEvents = 'none';
+        link.style.opacity = '0.6';
+    }
+
+    const indicator = document.getElementById(PROCESSING_INDICATOR_ID);
+    if (indicator) {
+        indicator.style.display = 'none';
+    }
+
+    // Clean up old download URL
+    if (downloadUrl) {
+        URL.revokeObjectURL(downloadUrl);
+        downloadUrl = null;
+    }
+}
+
+/**
+ * Enable the download button.
+ */
+function enableDownloadButton() {
+    const link = document.getElementById(DOWNLOAD_BUTTON_ID);
+    if (link) {
+        link.classList.remove('disabled');
+        link.setAttribute('aria-disabled', 'false');
+        link.style.pointerEvents = 'auto';
+        link.style.opacity = '1';
+    }
+
+    const indicator = document.getElementById(PROCESSING_INDICATOR_ID);
+    if (indicator) {
+        indicator.style.display = 'none';
+    }
+}
+
+/**
+ * Extract examiner data from HTML content using DOM parsing.
+ * @param {string} htmlContent - The HTML content to parse.
+ * @returns {Array} Array of examiner objects with Medewerker and Cursus properties.
+ */
+function extractExaminerData(htmlContent) {
+    console.log('[examinator_automation] Extracting examiner data...');
+
+    // Create a temporary DOM element to parse the HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlContent;
+
+    const examinersRows = [];
+
+    // Find all elements with class 'c51' (equivalent to p.c51 in CSS selector)
+    const paragraphs = tempDiv.querySelectorAll('.c51');
+
+    paragraphs.forEach(p => {
+        try {
+            // Extract employee name from the last word in parentheses
+            const text = p.textContent.trim();
+            const words = text.split(/\s+/);
+            const lastWord = words[words.length - 1];
+
+            // Check if last word is in parentheses
+            if (lastWord.startsWith('(') && lastWord.endsWith(')')) {
+                const medewerker = lastWord.slice(1, -1); // Remove parentheses
+
+                // Find the next table element
+                let nextElement = p.nextElementSibling;
+                while (nextElement && nextElement.tagName !== 'TABLE') {
+                    nextElement = nextElement.nextElementSibling;
+                }
+
+                if (nextElement && nextElement.tagName === 'TABLE') {
+                    // Find all course elements within the table (td.c62 span.c64)
+                    const courseSpans = nextElement.querySelectorAll('td.c62 span.c64');
+
+                    courseSpans.forEach(span => {
+                        const cursus = span.textContent.trim();
+                        if (cursus) {
+                            examinersRows.push({
+                                'Medewerker': medewerker,
+                                'Cursus': cursus
+                            });
+                        }
+                    });
+                }
+            }
+        } catch (error) {
+            console.warn('[examinator_automation] Error parsing examiner data:', error);
+        }
+    });
+
+    console.log(`[examinator_automation] Extracted ${examinersRows.length} examiner records`);
+    return examinersRows;
+}
+
+/**
+ * Create Excel file from examiner data using ExcelJS.
+ * @param {Array} examinersData - Array of examiner objects.
+ * @returns {Promise<Blob>} Promise that resolves to Excel file as a blob.
+ */
+async function createExcelFile(examinersData) {
+    console.log('[examinator_automation] Creating Excel file with ExcelJS...');
+
+    // Create a new workbook and worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Examinatoren');
+
+    // Set workbook properties
+    workbook.creator = 'Osiris Automation Tool';
+    workbook.title = 'Examinatoren Osiris';
+    workbook.created = new Date();
+
+    // Define columns with headers
+    worksheet.columns = [
+        { header: 'Medewerker', key: 'medewerker', width: 20 },
+        { header: 'Cursus', key: 'cursus', width: 30 }
+    ];
+
+    // Add data rows
+    examinersData.forEach(row => {
+        worksheet.addRow({
+            medewerker: row.Medewerker,
+            cursus: row.Cursus
+        });
+    });
+
+    // Create table with styling (only if we have data)
+    if (examinersData.length > 0) {
+        const tableRef = `A1:B${examinersData.length + 1}`;
+        worksheet.addTable({
+            name: 'ExaminatorTable',
+            ref: tableRef,
+            headerRow: true,
+            totalsRow: false,
+            style: {
+                theme: 'TableStyleMedium2',
+                showRowStripes: true,
+                showColumnStripes: false,
+                showFirstColumn: false,
+                showLastColumn: false
+            },
+            columns: [
+                { name: 'Medewerker', filterButton: true },
+                { name: 'Cursus', filterButton: true }
+            ],
+            rows: examinersData.map(row => [row.Medewerker, row.Cursus])
+        });
+    }
+
+    // Style the header row
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF4472C4' }
+    };
+    headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // Auto-fit columns based on content
+    worksheet.columns.forEach(column => {
+        let maxLength = 0;
+        column.eachCell({ includeEmpty: false }, (cell) => {
+            const columnLength = cell.value ? cell.value.toString().length : 0;
+            if (columnLength > maxLength) {
+                maxLength = columnLength;
+            }
+        });
+        column.width = Math.min(Math.max(maxLength + 2, 10), 50);
+    });
+
+    // Apply borders to all cells in the table
+    for (let rowNum = 1; rowNum <= examinersData.length + 1; rowNum++) {
+        const row = worksheet.getRow(rowNum);
+        for (let colNum = 1; colNum <= 2; colNum++) {
+            const cell = row.getCell(colNum);
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+        }
+    }
+
+    // Generate Excel buffer
+    const buffer = await workbook.xlsx.writeBuffer();
+
+    // Create and return blob
+    const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+
+    console.log(`[examinator_automation] Created Excel file with ${examinersData.length} records`);
+    return blob;
+}
+
+/**
+ * Handle download button click for the processed Excel file.
+ */
+function triggerExcelDownload(event) {
+    if (event) {
+        event.preventDefault();
+    }
+
+    if (downloadUrl) {
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = OUTPUT_FILENAME;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+}
+
+/**
+ * Process HTML file and create Excel output (replaces Python functionality).
+ * @param {File} file - The HTML file to process.
+ */
+async function processHtmlFile(file) {
+    console.log('[examinator_automation] Processing HTML file...');
+
+    if (!file) {
+        const fileInput = document.getElementById(FILE_INPUT_ID);
+        if (!fileInput || !fileInput.files.length) {
+            resetDownloadButton();
+            return;
+        }
+        file = fileInput.files[0];
+    }
+
+    resetDownloadButton();
+
+    try {
+        // Show processing indicator
+        const indicator = document.getElementById(PROCESSING_INDICATOR_ID);
+        if (indicator) {
+            indicator.style.display = 'inline-block';
+        }
+
+        // Read file content
+        const htmlContent = await readFileAsText(file);
+
+        // Extract examiner data
+        const examinersData = extractExaminerData(htmlContent);
+
+        if (examinersData.length === 0) {
+            alert('Geen examinator data gevonden in het bestand.');
+            resetDownloadButton();
+            return;
+        }
+
+        // Create Excel file
+        const excelBlob = await createExcelFile(examinersData);
+
+        // Create download URL
+        if (downloadUrl) {
+            URL.revokeObjectURL(downloadUrl);
+        }
+        downloadUrl = URL.createObjectURL(excelBlob);
+
+        // Enable download button
+        enableDownloadButton();
+
+        // Dispatch event to notify that processing is complete
+        const completionEvent = new CustomEvent('excelProcessingComplete', {
+            detail: { examinersCount: examinersData.length }
+        });
+        document.dispatchEvent(completionEvent);
+
+        console.log(`[examinator_automation] Successfully processed ${examinersData.length} examiner records`);
+
+    } catch (error) {
+        const errorMsg = `Fout bij verwerken bestand: ${error.message}`;
+        console.error('[examinator_automation]', errorMsg);
+        alert(errorMsg);
+        resetDownloadButton();
+    }
+}
+
+/**
+ * Read file as text using FileReader.
+ * @param {File} file - The file to read.
+ * @returns {Promise<string>} Promise that resolves to file content as text.
+ */
+function readFileAsText(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            resolve(e.target.result);
+        };
+
+        reader.onerror = () => {
+            reject(reader.error);
+        };
+
+        reader.readAsText(file);
+    });
 }
